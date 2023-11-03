@@ -1,0 +1,71 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>  
+#include <numeric>    
+#include <iomanip>    
+
+using namespace std;
+
+int main() {
+    int n;
+    while (true) {
+        try {
+            cout << "Введите количество критериев: ";
+            cin >> n;
+            break;
+        } catch (...) {
+            cout << "Неверное значение" << endl;
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        }
+    }
+
+    vector <vector <double>> s_matr(n, vector <double>(n, 0.0));
+
+    int a = 1; // счётчик, с помощью которого пропускаются заполненные значения
+    for (int i = a; i <= n; ++i) {
+        for (int j = a + 1; j <= n; ++j) {
+            while (true) {
+                try {
+                    // заполнение элементов строки матрицы
+                    cout << "Введите критерии сравнения К" << i << "-К" << j << ": ";
+                    cin >> s_matr[i - 1][j - 1];
+                    break;
+                } catch (...) {
+                    cout << "Неверное значение" << endl;
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                }
+            }
+            // заполнение ячеек для отношений К1-К2 к К2-К1
+            s_matr[j - 1][i - 1] = 1.0 / s_matr[i - 1][j - 1];
+        }
+        a++;
+    }
+
+    vector <double> comp_list(n, 0.0);
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            comp_list[i] += s_matr[i][j];
+        }
+    }
+
+    vector <double> out_list(n, 0.0);
+    for (int i = 0; i < n; ++i) {
+        out_list[i] = comp_list[i] / accumulate(comp_list.begin(), comp_list.end(), 0.0);
+    }
+
+    if (accumulate(out_list.begin(), out_list.end(), 0.0) != 1.0) {
+        int index = distance(out_list.begin(), max_element(out_list.begin(), out_list.end()));
+        double k = accumulate(out_list.begin(), out_list.end(), 0.0) - 1.0;
+        out_list[index] -= k;
+    }
+
+    cout << "Весовые коэффициенты" << endl;
+    for (double ind : out_list) {
+        cout << fixed << setprecision(2) << ind << ' ';
+    }
+    cout << endl;
+
+    return 0;
+}
